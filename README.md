@@ -1,38 +1,58 @@
-## Kanban Desktop App
+# Kanban Desktop App
 
-### Project Overview
-We aim to build a Kanban workflow board implemented as a desktop application. This document specifies the core requirements and outlines the application architecture.
+A desktop Kanban board application built with Electron, React, and TypeScript.
 
-### Core Requirements
-- User accounts  
-- Create and delete boards  
-- Add, edit, and delete columns  
-- Add, edit, and delete cards  
-- Move cards between columns  
-- Persist data in a SQL database (SQLite3)
+## Features
+- User account management
+- Create and delete boards
+- Add, edit, and delete columns
+- Add, edit, and delete cards
+- Move cards between columns
+- Local SQLite database for data persistence
 
 ## Technologies
 
-### Stack
-- **TypeScript Desktop UI + Python Backend API**
-
-### Desktop UI
-- **Electron** — Desktop application shell  
-- **React** — UI components  
-- **TypeScript** — Language  
-- **Vite** — Development server and build tooling  
-
-### Backend
-- **Python FastAPI** — Backend REST API  
-- **Uvicorn** — Server to run FastAPI  
+### Frontend
+- **Electron** — Desktop application framework
+- **React** — UI component library
+- **TypeScript** — Type-safe JavaScript
+- **Vite** — Build tool and dev server
 
 ### Database
-- **SQLite3** — Simple persistent database for the backend  
+- **SQLite3** — Embedded SQL database (via better-sqlite3)
 
-### Communication
-- **Local HTTP/JSON** communication between the Electron UI and FastAPI  
-  (`127.0.0.1:<port>`)
+## Project Structure
+```
+src/
+├── main/               # Electron main process (Node.js environment)
+│   ├── main.ts         # Application entry point, window management
+│   ├── database.ts     # SQLite database operations
+│   └── ipc-handlers.ts # IPC message handlers
+│
+├── renderer/           # React UI (Browser environment)
+│   ├── App.tsx         # Root React component
+│   ├── components/     # Board, Column, Card components
+│   └── index.html      # HTML entry point
+│
+└── preload/            # Security bridge
+    └── preload.ts      # Exposes safe IPC APIs to renderer
+```
 
+## Architecture
 
+The app uses Electron's multi-process architecture with IPC communication:
+```
+React UI (renderer process)
+        ↓ IPC
+Electron Main Process
+        ↓
+SQLite Database
+        ↑
+Electron Main Process
+        ↑ IPC
+React UI (renderer process)
+```
 
+## Getting Started
 
+[Installation and development instructions to be added]
