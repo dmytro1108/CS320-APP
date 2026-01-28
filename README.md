@@ -53,6 +53,48 @@ Electron Main Process
 React UI (renderer process)
 ```
 
+## GitHub Management
+
+We are working in this repo as a team and will follow a structured workflow for managing our work.
+
+### Branch Protection
+The `main` branch is protected with the following rules:
+- All changes must be made through pull requests
+- Direct pushes to `main` are not allowed (even for admins)
+
+### Workflow
+1. **Create a feature branch** for each task/feature
+```bash
+   git checkout main
+   git pull
+   git checkout -b feature-name
+```
+
+2. **Make your changes** and commit regularly
+```bash
+   git add .
+   git commit -m "Descriptive message"
+```
+
+3. **Push your branch** to GitHub
+```bash
+   git push origin feature-name
+```
+
+4. **Create a pull request**
+```bash
+   gh pr create
+```
+   Or use the GitHub web interface
+
+5. **Code review** - Team members review the PR
+
+6. **Merge** - Once approved, merge the PR into `main`
+
+### Resources
+See `/prof-instructions` for additional guidelines from course materials.
+
 ## Getting Started
 
 [Installation and development instructions to be added]
+
