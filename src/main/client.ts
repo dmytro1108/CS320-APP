@@ -20,30 +20,18 @@ let socket = new WebSocket("ws://localhost:3050");
 socket.onopen = function(e) {
 	//test qustions to test sending random data to the server
 	rl.question("Do you want to create a new account (new) or login (login) ", function(command){
-		
-		
-		
-		
-		
-		
-		
 		if (command === "new") {
-			
-			
 		}
-		
-		
-		
-		
-		else if (command === "login"
-		socket.send(`My name is: ${name}`);
-		rl.question("What year is it ? ", function(year){
-			socket.send(`It is the year: ${year}`);
-			//close interface for reading from stdin
-			rl.close();
-			//close the connect and end the program
-			socket.close();
-		});
+		else if (command === "login") {
+            socket.send(`My name is: ${command}`);
+            rl.question("What year is it ? ", function(year){
+                socket.send(`It is the year: ${year}`);
+                //close interface for reading from stdin
+                rl.close();
+                //close the connect and end the program
+                socket.close();
+            });
+        }
 	});
 };
 
@@ -52,4 +40,3 @@ socket.onopen = function(e) {
 socket.onmessage = function(event) {
   console.log(`Received from server: ${event.data}`);
 };
-

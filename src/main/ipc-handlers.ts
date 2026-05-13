@@ -142,6 +142,62 @@ export function registerColumnHandlers() {
     })
 }
 
+import { AccountConnection } from './database/AccountConnection'
+
+export function registerAccountHandlers() {
+    ipcMain.handle('account:login', async(_event, username, password) => {
+        const accountsDb = AccountConnection.getInstance('') // Instance should already exist from index.ts setup
+
+        try {
+            const user: any = accountsDb.query(
+                `SELECT * FROM users WHERE username = ? AND password = ?`,
+                [username, password]
+            )
+
+            if (user && user.length > 0) {
+                return { response: 0, email: user[0].email }
+            } else {
+                const usernameExists: any = accountsDb.query(
+                    `SELECT * FROM users WHERE username = ?`,
+                    [username]
+                )
+                if (usernameExists && usernameExists.length > 0) {
+                    return { response: 1 } // wrong password
+                }
+                return { response: 2 } // username does not exist
+            }
+        } catch (e) {
+            console.error("Login Error: ", e)
+            return { response: 10 }
+        }
+    })
+
+    ipcMain.handle('account:signup', async(_event, username, email, password) => {
+        const accountsDb = AccountConnection.getInstance('')
+        const createdAt = Date.now()
+
+        try {
+            const existingUser: any = accountsDb.query(
+                `SELECT * FROM users WHERE username = ?`,
+                [username]
+            )
+
+            if (existingUser && existingUser.length > 0) {
+                return { response: 1 } // username already taken
+            }
+
+            accountsDb.execute(
+                `INSERT INTO users (createdAt, username, email, password) VALUES (?, ?, ?, ?)`,
+                [createdAt, username, email, password]
+            )
+            return { response: 0 } // success
+        } catch (e) {
+             console.error("Signup Error: ", e)
+             return { response: 10 }
+        }
+    })
+}
+
 export function registerCardHandlers() {
     ipcMain.handle('card:create', async(_event, card) => {
         const cardRepo = new CardRepository()

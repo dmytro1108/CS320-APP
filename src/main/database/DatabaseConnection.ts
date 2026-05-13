@@ -15,6 +15,8 @@ class DatabaseConnection {
 
     private initializeSchema() {
 
+        /*
+        Commented out to separate accounts DB
         this.db.prepare(`
             CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
@@ -23,6 +25,7 @@ class DatabaseConnection {
             password TEXT
             )
         `).run()
+        */
 
         this.db.prepare(`
             CREATE TABLE IF NOT EXISTS boards (
@@ -30,8 +33,8 @@ class DatabaseConnection {
             createdAt INTEGER,
             title TEXT,
             description TEXT,
-            userID INTEGER,
-            FOREIGN KEY (userID) REFERENCES users(id)
+            userID INTEGER
+            /* FOREIGN KEY (userID) REFERENCES users(id) */
             )
         `).run()
 
