@@ -63,3 +63,11 @@ export async function deleteCard(cardID: number): Promise<void> {
   return window.electron.ipcRenderer.invoke('card:delete', cardID)
 }
 
+// Accounts
+export async function login(username: string, password: string): Promise<{ response: number, email?: string }> {
+  return window.electron.ipcRenderer.invoke('account:login', username, password)
+}
+
+export async function signup(username: string, email: string, password: string): Promise<{ response: number }> {
+  return window.electron.ipcRenderer.invoke('account:signup', username, email, password)
+}

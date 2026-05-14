@@ -65,6 +65,8 @@ class MainView extends React.Component<MainViewProps, DisplayColProp> {
   board: Board 
   selectedCol: Column
   selectedCard: Card
+  newLink: any
+  myAccount: Accounts
 
   constructor(props: MainViewProps) {
     super(props)

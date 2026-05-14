@@ -1,7 +1,8 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
-import { registerBoardHandlers, registerColumnHandlers, registerCardHandlers } from './ipc-handlers'
+import { registerBoardHandlers, registerColumnHandlers, registerCardHandlers, registerAccountHandlers } from './ipc-handlers'
 import { DatabaseConnection } from './database/DatabaseConnection'
+import { AccountConnection } from './database/AccountConnection'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
@@ -56,14 +57,27 @@ app.whenReady().then(() => {
 
   // Initialize database and IPC handlers
   const dbPath = join(app.getPath('userData'), 'kanflow.db')
+  const accountsDbPath = join(app.getPath('userData'), 'accounts.db')
+
   const db = DatabaseConnection.getInstance(dbPath)
+  const accountsDb = AccountConnection.getInstance(accountsDbPath)
+
+  /* Commented out as users are now separated
   db.execute(
     `INSERT OR IGNORE INTO users (id, createdAt, username, password) VALUES (1, ?, 'demo', 'demo')`,
     [Date.now()]
   )
+  */
+
+  accountsDb.execute(
+    `INSERT OR IGNORE INTO users (id, createdAt, username, password, email) VALUES (1, ?, 'demo', 'demo', 'demo@example.com')`,
+    [Date.now()]
+  )
+
   registerBoardHandlers()
   registerColumnHandlers()
   registerCardHandlers()
+  registerAccountHandlers()
 
   createWindow()
 

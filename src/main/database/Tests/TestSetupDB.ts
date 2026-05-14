@@ -8,7 +8,7 @@ export function setupTestDB() {
     DatabaseConnection.resetInstance()
     const db = DatabaseConnection.getInstance(':memory:')
 
-    db.execute(`INSERT INTO users (createdAt, username, password) VALUES (?, ?, ?)`, [Date.now(), 'testuser', 'password'])
+    /* db.execute(`INSERT INTO users (createdAt, username, password) VALUES (?, ?, ?)`, [Date.now(), 'testuser', 'password']) */
 
     const boardRepo = new BoardRepository()
     const columnRepo = new ColumnRepository()

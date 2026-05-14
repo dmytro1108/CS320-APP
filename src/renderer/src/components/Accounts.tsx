@@ -1,13 +1,17 @@
-import WebSocketLink from './components/WebSocketLink'
+// import WebSocketLink from './components/WebSocketLink'
+import { login, signup } from '../ipc'
 
 export default class Accounts {
 	
   	userName: string
   	email: string
   	password: string
+    // kept for backwards compat but not used directly
+    username: string
 
 	constructor(userName: string, email: string, password: string) {
 		this.userName = userName;
+        this.username = userName;
 		this.email = email
 		this.password = password;
 	}
@@ -27,16 +31,19 @@ export default class Accounts {
 	}
 	
 	
-	login(username: string, password: string, app): void{
-		
+	async login(username: string, password: string, app): Promise<void> {
 		this.username = username;
 		this.password = password;		
-		app.newLink.sendMessage(JSON.stringify({ "command":"login", "code": { "username": username, "password": password}}), this.postLogin, app);
 		
+        // WebSocket call commented out for local demo
+        // app.newLink.sendMessage(JSON.stringify({ "command":"login", "code": { "username": username, "password": password}}), this.postLogin, app);
+
+        // Replaced with IPC to local accounts DB
+        const result = await login(username, password)
+        this.postLogin(JSON.stringify(result), app)
 	}
 	
 	postLogin(command, app): void{
-		
 		const response = JSON.parse(command);
 		
 		if (response.response == 0) {
@@ -69,16 +76,19 @@ export default class Accounts {
 				debugMsg: "MariaDB down, please try again at a later time" 
 				})
 		}
-		
 	}
 	
-	signUp(username: string, email: string, password: string, app): void{
-		
+	async signUp(username: string, email: string, password: string, app): Promise<void>{
 		this.username = username;
 		this.email = email
 		this.password = password;		
-		app.newLink.sendMessage(JSON.stringify({ "command":"create_account", "code": { "username": username, "email": email, "password": password}}), this.postSignUp, app);
 		
+        // WebSocket call commented out for local demo
+        // app.newLink.sendMessage(JSON.stringify({ "command":"create_account", "code": { "username": username, "email": email, "password": password}}), this.postSignUp, app);
+
+        // Replaced with IPC to local accounts DB
+        const result = await signup(username, email, password)
+        this.postSignUp(JSON.stringify(result), app)
 	}
 	
 	postSignUp(command, app): void{
@@ -99,9 +109,6 @@ export default class Accounts {
 				debugMsg: "Username is already taken" 
 				})
 		}
-
-		
 	}
-
 
 }

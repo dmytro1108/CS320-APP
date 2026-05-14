@@ -11,7 +11,7 @@ import { Board, Column } from '../../../shared/types';
 beforeEach(() => {
     DatabaseConnection.resetInstance()
     const db = DatabaseConnection.getInstance(':memory:')
-    db.execute(`INSERT INTO users (createdAt, username, password) VALUES (?, ?, ?)`, [Date.now(), 'testuser', 'password'])
+    /* db.execute(`INSERT INTO users (createdAt, username, password) VALUES (?, ?, ?)`, [Date.now(), 'testuser', 'password']) */
 })
 
 

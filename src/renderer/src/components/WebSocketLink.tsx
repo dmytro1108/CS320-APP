@@ -7,7 +7,7 @@ export default class WebSocketLink {
 	
 	ipAddress: string
   	port: string
-  	socket: WebSocket
+	socket: any
 
 	//contruct with the ipaddress and port, which should not change during run
 	constructor(ipAddress: string, port) {
