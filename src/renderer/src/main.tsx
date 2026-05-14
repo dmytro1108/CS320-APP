@@ -13,12 +13,12 @@ import { createCard, getCardsByColumn, updateCard, deleteCard } from './ipc'
 import { exportToFile } from './ipc'
 
 //Constants for easier style prototyping
-const COLUMN_BORDER: string = "1px solid #d6d6d6";
+const COLUMN_BORDER: string = "1px solid #00ff00";
 const COLUMN_WIDTH: string = "240px";
 const COLUMN_HEIGHT: string = "100vh";
-const COLUMN_TEXT_COLOR: string = "black";
-const COLUMN_FONT_WEIGHT: string = "bold";
-const COLUMN_BACKGROUND_COLOR: string = "white";
+const COLUMN_TEXT_COLOR: string = "#00ff00";
+const COLUMN_FONT_WEIGHT: string = "normal";
+const COLUMN_BACKGROUND_COLOR: string = "#050505";
 const COLUMN_FONT_STYLE: string = "normal";
 
 //single size to keep both button and column text the same size
@@ -58,6 +58,8 @@ type DisplayColProp = { // render board state with columns
   demoBoardID: number
   demoColumnID: number
   demoCardID: number
+  isBooting: boolean
+  bootText: string
 }
 
 
@@ -91,7 +93,9 @@ class MainView extends React.Component<MainViewProps, DisplayColProp> {
       demo2: 0,
       demoBoardID: -1,
       demoColumnID: -1,
-      demoCardID: -1
+      demoCardID: -1,
+      isBooting: false,
+      bootText: ""
     }
     
     //create a single WebSocketLink object, since ideally the location of the server would never change.
@@ -105,12 +109,12 @@ class MainView extends React.Component<MainViewProps, DisplayColProp> {
     const boardLength = this.state.boardList.length
     const newBoard = new Board("", [], this.board.boards, boardLength)
     
-    this.setState(({
-      boardList: this.board.addBoard(newBoard).boards,
-      currI: newBoard.board_i,
-      board: newBoard,
+    this.setState({
+      boardList: [...this.state.boardList, newBoard],
+      currI: this.state.currI,
+      board: this.state.board,
       debugMsg: "added board " + newBoard.board_name
-    }))
+    })
   }
 
   addCol = () => {
@@ -161,7 +165,7 @@ class MainView extends React.Component<MainViewProps, DisplayColProp> {
     boardArr[this.state.currI] = newBoard
   
     this.setState({
-      board: newBoard,
+      board: this.state.board,
       boardList: boardArr,
       currI: this.state.currI,
       debugMsg: "added card " + newCard.card_id
@@ -194,8 +198,7 @@ class MainView extends React.Component<MainViewProps, DisplayColProp> {
   dragStart = (e: any, card_id: number, colID: number) => {
     e.dataTransfer.setData("card_id", card_id)
     e.dataTransfer.setData("colID", colID)
-    // add card to column and update state
-    this.dragCard(colID, card_id)
+
     this.setState({ debugMsg: "card " + card_id + " from column " + colID })
   }
 
@@ -203,70 +206,66 @@ class MainView extends React.Component<MainViewProps, DisplayColProp> {
     e.preventDefault()
   }
 
-  dropAddCard = (toCol: number) => {
-    // drop into
-    const b = this.state.boardList.slice()
-    const currB = b[this.state.currI]
-    
-    const c = currB.columns.slice()
-    const currC = c[toCol]
-    
-    // add
-    const cardID = currC.cards.length + 1
-    currC.cards.push(new Card(cardID, cardID, "dropped", "!"))
-    
-    // update col
-    c[toCol] = currC
+  drop = (e: React.DragEvent, toColID: number) => {
+    e.preventDefault();
+    const fromColIDStr = e.dataTransfer.getData("colID");
+    const cardIDStr = e.dataTransfer.getData("card_id");
 
-    // update board
-    const newB = new Board(currB.board_name, c, currB.boards, currB.board_i)
-    b[this.state.currI] = newB
-    
-    this.setState({
-      board: newB,
-      boardList: b,
-      currI: this.state.currI,
-      debugMsg: "card " + currC.cards[cardID].card_id + " added to column " + currC.column_name
-    })
-  }  
+    if (!fromColIDStr || !cardIDStr) {
+      this.setState({ debugMsg: "drop failed: missing dataTransfer info" });
+      return;
+    }
 
-  drop = (colID: number) => {
-    // remove card from column and update state
-    this.dropRemCard()
-    this.dropAddCard(colID)
-  }
- 
-  dragCard = (colID: number, cardID: number) => {
-    // retrieve ids
-    this.setState({
-      colID: colID,
-      cardID: cardID
-    })
-  }
+    const fromColID = parseInt(fromColIDStr);
+    const cardID = parseInt(cardIDStr);
 
-  // add card to the column
-  dropRemCard = () => {
-    const b = this.state.boardList.slice()
-    const currB = b[this.state.currI]
-    
-    const c = currB.columns.slice()
-    const currC = c[this.state.colID]
-    
-    // removes
-    currC.cards.splice(this.state.cardID, 1)
-    c[this.state.colID] = currC
+    if (fromColID === toColID) {
+      this.setState({ debugMsg: "drop ignored: same column" });
+      return;
+    }
 
-    // updates state
-    const newB = new Board(currB.board_name, c, currB.boards, currB.board_i)
-    b[this.state.currI] = newB
+    const boardList = this.state.boardList.slice();
+    const currBoard = boardList[this.state.currI];
+    if (!currBoard) return;
+
+    const columns = currBoard.columns.slice();
+    const fromCol = columns[fromColID];
+    const toCol = columns[toColID];
+
+    if (!fromCol || !toCol) {
+      this.setState({ debugMsg: "drop failed: column not found" });
+      return;
+    }
+
+    // Find the actual card object
+    const cardIndex = fromCol.cards.findIndex(c => c.card_id === cardID);
+    if (cardIndex === -1) {
+      this.setState({ debugMsg: "drop failed: card not found" });
+      return;
+    }
+
+    const cardToMove = fromCol.cards[cardIndex];
+
+    // Remove from source column
+    const newFromCards = fromCol.cards.slice();
+    newFromCards.splice(cardIndex, 1);
+    columns[fromColID] = new Column(fromCol.column_name, fromCol.colID, newFromCards);
+
+    // Add to destination column
+    const newToCards = toCol.cards.slice();
+    newToCards.push(cardToMove);
+    columns[toColID] = new Column(toCol.column_name, toCol.colID, newToCards);
+
+    const newBoard = new Board(currBoard.board_name, columns, currBoard.boards, currBoard.board_i);
+    boardList[this.state.currI] = newBoard;
 
     this.setState({
-      board: newB,
-      boardList: b,
-      currI: this.state.currI,
-    })
+      board: newBoard,
+      boardList: boardList,
+      debugMsg: "moved card " + cardID + " to column " + toColID
+    });
   }
-  
+
   export = async () => {
     const b = this.state.board
     if (!b) return
@@ -327,13 +326,35 @@ class MainView extends React.Component<MainViewProps, DisplayColProp> {
   }
   
   selected = (i: number) => {
-    const selected = this.state.boardList[i]
-            
+    if (this.state.isBooting) return;
+    const selected = this.state.boardList[i];
+
     this.setState({
-      currI: i,
-      board: selected,
-      debugMsg: "selected board " + selected.board_name
-    })
+      isBooting: true,
+      bootText: ""
+    });
+
+    const fullText = "KERNEL LOADING...";
+    let charIndex = 0;
+
+    const interval = setInterval(() => {
+      this.setState(prevState => ({
+        bootText: prevState.bootText + fullText[charIndex]
+      }));
+      charIndex++;
+
+      if (charIndex === fullText.length) {
+        clearInterval(interval);
+        setTimeout(() => {
+          this.setState({
+            currI: i,
+            board: selected,
+            debugMsg: "selected board " + selected.board_name,
+            isBooting: false
+          });
+        }, 500); // Wait a bit after typing completes
+      }
+    }, 50); // Total typing time ~ 50 * 17 = 850ms + 500ms delay ~ 1.3s
   }
 
   dbBoard = async () => {
@@ -368,7 +389,7 @@ class MainView extends React.Component<MainViewProps, DisplayColProp> {
     const coolCol = this.state.board.columns.map((col) => (
       <div className="tabRow" key={col.colID}>
         <input type="text" placeholder='name your column' defaultValue={col.column_name} onChange={(e) => { col.column_name = e.target.value }} style={{ width: "100%" }}></input>
-        <div onDragOver={(e) => this.dragOver(e)} onDrop={() => this.drop(col.colID)} style={{ border: COLUMN_BORDER, width: COLUMN_WIDTH, height: COLUMN_HEIGHT, color: COLUMN_TEXT_COLOR, fontWeight: COLUMN_FONT_WEIGHT, backgroundColor: COLUMN_BACKGROUND_COLOR, fontSize: COLUMN_FONT_SIZE, paddingLeft: COLUMN_PADDING_LEFT, paddingRight: COLUMN_PADDING_RIGHT, paddingTop: COLUMN_PADDING_TOP, paddingBottom: COLUMN_PADDING_BOTTOM }}>
+        <div onDragOver={(e) => this.dragOver(e)} onDrop={(e) => this.drop(e, col.colID)} style={{ border: COLUMN_BORDER, width: COLUMN_WIDTH, height: COLUMN_HEIGHT, color: COLUMN_TEXT_COLOR, fontWeight: COLUMN_FONT_WEIGHT, backgroundColor: COLUMN_BACKGROUND_COLOR, fontSize: COLUMN_FONT_SIZE, paddingLeft: COLUMN_PADDING_LEFT, paddingRight: COLUMN_PADDING_RIGHT, paddingTop: COLUMN_PADDING_TOP, paddingBottom: COLUMN_PADDING_BOTTOM }}>
           <button style={{ fontSize: "100%", marginBottom: "8px" }} onClick={() => {this.createCard(col.colID); this.dbCard()}} type="button">+</button>
           
           {col.cards.map((card) => (
@@ -474,9 +495,15 @@ class MainView extends React.Component<MainViewProps, DisplayColProp> {
           <button style={{ fontSize: BUTTON_FONT_SIZE }} onClick={() => { this.addCol(); this.dbColumn();}} >+</button>
           <div style={{ fontWeight: 'bold', marginBottom: '12px' }}>
           </div>
-          <div style={{display: "flex"}}>
-            {coolCol}
-          </div>
+          {this.state.isBooting ? (
+            <div className="boot-sequence" style={{ color: '#00ff00', fontFamily: 'monospace', fontSize: '24px', padding: '20px' }}>
+              {this.state.bootText}<span className="cursor">_</span>
+            </div>
+          ) : (
+            <div style={{display: "flex"}}>
+              {coolCol}
+            </div>
+          )}
         </div>
 
       </div>

@@ -7,12 +7,12 @@ const COLUMN_PADDING_TOP: string = COLUMN_PADDING;
 const COLUMN_PADDING_BOTTOM: string = COLUMN_PADDING;
 
 //Constants for easier style prototyping
-const COLUMN_BORDER: string = "3px solid #ccc";
+const COLUMN_BORDER: string = "1px solid #00ff00";
 const COLUMN_WIDTH: string = "200px";
 const COLUMN_HEIGHT: string = "300px";
-const COLUMN_TEXT_COLOR: string = "black";
-const COLUMN_FONT_WEIGHT: string = "bold";
-const COLUMN_BACKGROUND_COLOR: string = "white";
+const COLUMN_TEXT_COLOR: string = "#00ff00";
+const COLUMN_FONT_WEIGHT: string = "normal";
+const COLUMN_BACKGROUND_COLOR: string = "#050505";
 const COLUMN_FONT_STYLE: string = "normal";
 
 //single size to keep both button and column text the same size

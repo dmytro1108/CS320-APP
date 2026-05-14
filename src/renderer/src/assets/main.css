@@ -1,3 +1,20 @@
+
+:root {
+  --term-bg: #050505;
+  --term-fg: #00ff00;
+  --term-font: 'Courier New', Courier, monospace;
+  --term-border: 1px solid #00ff00;
+  --term-shadow: 0 0 5px #00ff00, inset 0 0 5px #00ff00;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--term-bg);
+  color: var(--term-fg);
+  font-family: var(--term-font);
+}
+
 .mainview {
   display: flex;
   flex-direction: row;
@@ -8,40 +25,44 @@
 
 .rightSide {
   width: 260px;
-  height: 100vh;             /* full height */
-  border: 1px solid #d6d6d6;
+  height: 100vh;
+  border-right: var(--term-border);
   padding: 4px 8px;
-  font-size: 12px;
-  margin-bottom: 6px;
+  font-size: 14px;
   box-sizing: border-box;
-  overflow-y: auto;          /* scroll when boards list grows */
-  background: #fafafa;
+  overflow-y: auto;
+  background: var(--term-bg);
+  color: var(--term-fg);
 }
 
 .tabRow {
-  height: 38px;
+  height: auto;
   font-size: 15px;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .cardBlock {
-  border: 1px solid #d6d6d6; 
-  border-radius: 8px;       
+  border: var(--term-border);
+  border-radius: 0px;
   padding: 6px 8px;            
   margin-top: 10px;      
-  box-shadow: 0 1px 2px rgba(209, 218, 255, 0.06);
+  box-shadow: var(--term-shadow);
   cursor: grab;
+  background: var(--term-bg);
+  color: var(--term-fg);
 }
 
 .leftSide {
   padding: 16px;
+  flex: 1;
+  overflow-x: auto;
 }
 
 .tabsView {
-  height: 30px;
+  height: auto;
   padding: 4px 8px;
-  font-size: 12px;
+  font-size: 14px;
   margin-bottom: 6px;
 }
 
@@ -49,22 +70,61 @@
   cursor: grabbing;
 }
 
-button { /* button style */
-  border: 1px solid #d6d6d6;
-  border-radius: 8px;
+button {
+  border: var(--term-border);
+  border-radius: 0px;
   padding: 6px 10px;
-  background: #fff;
+  background: var(--term-bg);
+  color: var(--term-fg);
   cursor: pointer;
-}
-button:hover {
-  background: #f6f6f6;
+  font-family: var(--term-font);
+  text-transform: uppercase;
+  transition: all 0.2s;
+  box-shadow: 0 0 3px #00ff00;
 }
 
-input { /* text field style */
+button:hover {
+  background: #00ff00;
+  color: #050505;
+  box-shadow: 0 0 10px #00ff00;
+}
+
+input {
   box-sizing: border-box;
-  border: 1px solid #d6d6d6;
-  border-radius: 8px;
+  border: var(--term-border);
+  border-radius: 0px;
   padding: 6px 8px;
-  font-size: 19px;
-  background: #fff;
+  font-size: 14px;
+  background: var(--term-bg);
+  color: var(--term-fg);
+  font-family: var(--term-font);
+}
+
+input:focus {
+  outline: none;
+  box-shadow: 0 0 8px #00ff00;
+}
+
+input::placeholder {
+  color: #00aa00;
+  opacity: 0.7;
+}
+
+/* Typing animation cursor */
+.cursor {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* Add staggered animation to coolCol elements to simulate rendering */
+@keyframes slideDownFader {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tabRow {
+  animation: slideDownFader 0.3s ease-out forwards;
 }
