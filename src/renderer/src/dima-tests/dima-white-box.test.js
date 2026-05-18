@@ -26,8 +26,8 @@ test('card title matches what is assigned to it', () => {
 
   const newList = c1.addCard(card1)
 
-  /* title of the card object is exactly "stuff" */
-  expect(newList.cards[0].title).toBe('stuff')
+  /* title of the card object is exactly "card1" */
+  expect(newList.cards[0].title).toBe('card1')
 })
 
 test('names are consistently part of each seperate card ', () => {
@@ -37,8 +37,8 @@ test('names are consistently part of each seperate card ', () => {
 
   const newList = c1.addCard(card1)
 
-  /* title of the second card object is exactly "stuff" */
-  expect(newList.cards[0].title).toBe('stuff')
+  /* title of the second card object is exactly "card1" */
+  expect(newList.cards[0].title).toBe('card1')
 })
 
 test('column created with card changes shape after card is added', () => {
